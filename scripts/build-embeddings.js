@@ -1,7 +1,8 @@
 /**
- * Session 8 Core: walk a vault, call embedText (you implement), write embeddings.json.
- * Cap: 10 markdown files.
+ * Walk sample-vault (or VAULT_PATH), split markdown into chunks, embed with
+ * gemini-embedding-2, write embeddings.json.
  *
+ *   npm run build-embeddings
  *   VAULT_PATH=../my-vault npm run build-embeddings
  */
 import 'dotenv/config';
@@ -9,7 +10,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { GoogleGenAI } from '@google/genai';
-import { embedText } from '../lib/embeddings.js';
+import { embedText, splitMarkdownChunks } from '../lib/embeddings.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.join(__dirname, '..');
@@ -45,19 +46,26 @@ async function main() {
 
   for (const file of files) {
     const content = fs.readFileSync(file, 'utf8');
-    const truncated = content.slice(0, 8000);
-    console.log('Embedding', path.relative(vaultPath, file));
-    try {
-      const embedding = await embedText(ai, truncated, 'RETRIEVAL_DOCUMENT');
-      embeddingsData.push({
-        file: path.relative(vaultPath, file),
-        content,
-        embedding,
-      });
-    } catch (err) {
-      console.error('Failed on', file, err.message);
-      console.error('Did you implement embedText() in lib/embeddings.js?');
-      process.exit(1);
+    const rel = path.relative(vaultPath, file);
+    const chunks = splitMarkdownChunks(content);
+    if (!chunks.length) {
+      console.log('Skipping empty', rel);
+      continue;
+    }
+    console.log(`Embedding ${rel} (${chunks.length} chunk${chunks.length === 1 ? '' : 's'})`);
+    for (let i = 0; i < chunks.length; i += 1) {
+      try {
+        const embedding = await embedText(ai, chunks[i], 'RETRIEVAL_DOCUMENT', rel);
+        embeddingsData.push({
+          file: rel,
+          chunkIndex: i,
+          content: chunks[i],
+          embedding,
+        });
+      } catch (err) {
+        console.error('Failed on', rel, `chunk ${i}`, err.message);
+        process.exit(1);
+      }
     }
   }
 
