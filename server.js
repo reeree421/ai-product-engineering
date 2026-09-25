@@ -35,6 +35,11 @@ const tools = [{ functionDeclarations: [calculatorTool, deadlinesTool, searchKno
 app.post('/query', async (req, res) => {
   try {
     const userInput = req.body.userInput ?? req.body.prompt ?? req.body.query;
+
+    if (!userInput || !userInput.trim()) {
+      return res.status(400).json({ response: 'Missing or empty query.' });
+    }
+    
     const { base64Image, mimeType } = req.body;
 
     const chunks = await retrieveRelevantChunks(ai, userInput, 3);

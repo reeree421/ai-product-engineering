@@ -22,7 +22,7 @@ async function main() {
   }
 
   const cases = JSON.parse(fs.readFileSync(suitePath, 'utf8'));
-  const limit = Math.min(cases.length, Number(process.env.EVAL_LIMIT || 10));
+  const limit = Math.min(cases.length, Number(process.env.EVAL_LIMIT || 15));
   const rl = readline.createInterface({ input, output });
   const results = [];
 
