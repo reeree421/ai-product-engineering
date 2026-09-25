@@ -6,15 +6,25 @@
 import 'dotenv/config';
 import { GoogleGenAI } from '@google/genai';
 
-const MODEL = 'gemini-2.5-flash';
+const MODEL = 'gemini-3.5-flash-lite';
 
-async function askAi(ai, prompt) {
-  const response = await ai.models.generateContent({
-    model: MODEL,
-    contents: prompt,
-    config: { temperature: 0.3 },
-  });
-  return response.text ?? '';
+async function askAi(ai, prompt, retries = 3) {
+  for (let attempt = 0; attempt <= retries; attempt += 1) {
+    try {
+      const response = await ai.models.generateContent({
+        model: MODEL,
+        contents: prompt,
+        config: { temperature: 0.3 },
+      });
+      return response.text ?? '';
+    } catch (err) {
+      const retryable = err?.status === 503 || err?.status === 429;
+      if (!retryable || attempt === retries) throw err;
+      const delay = 1000 * 2 ** attempt;
+      console.warn(`Model busy (${err.status}), retrying in ${delay}ms...`);
+      await new Promise((r) => setTimeout(r, delay));
+    }
+  }
 }
 
 async function runAgentTask(ai, goal) {

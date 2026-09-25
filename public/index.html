@@ -4,31 +4,213 @@
   <meta charset="UTF-8">
   <title>Context-Aware Academic Assistant</title>
   <style>
-    body { font-family: sans-serif; max-width: 800px; margin: 0 auto; padding: 2rem; }
-    textarea { width: 100%; height: 100px; margin-bottom: 1rem; }
-    #output { margin-top: 2rem; padding: 1rem; background: #f0f0f0; border-radius: 8px; white-space: pre-wrap;}
+    body {
+      font-family: sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 2rem;
+      background-color: #933B5B;
+      color: #E3D6BF;
+    }
+    textarea {
+      width: 100%;
+      height: 100px;
+      margin-bottom: 1rem;
+      background-color: #E3D6BF;
+      color: #933B5B;
+      border: none;
+      border-radius: 6px;
+      padding: 0.5rem;
+      font-family: inherit;
+    }
+    button, .file-btn {
+      background-color: #E3D6BF;
+      color: #933B5B;
+      border: none;
+      padding: 0.5rem 1.5rem;
+      border-radius: 6px;
+      font-weight: bold;
+      font-family: inherit;
+      font-size: 1rem;
+      cursor: pointer;
+      display: inline-block;
+    }
+    input[type="file"] { display: none; }
+    #fileName { margin-left: 0.5rem; font-size: 0.9rem; opacity: 0.85; }
+    #output {
+      margin-top: 2rem;
+      padding: 1rem;
+      background: rgba(227, 214, 191, 0.15);
+      border: 1px solid #E3D6BF;
+      border-radius: 8px;
+      white-space: pre-wrap;
+    }
     .hidden { display: none; }
+    .mode-toggle { margin-bottom: 1rem; }
+    .mode-toggle label { margin-right: 1.5rem; cursor: pointer; }
+    #sources { margin-top: 0.5rem; font-size: 0.85rem; opacity: 0.8; }
+
+    .send-row {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    /* ---- Pure-CSS cat ---- */
+    .cat-box {
+      width: 70px;
+      height: 50px;
+      position: relative;
+    }
+    .cat {
+      position: absolute;
+      bottom: 0;
+      left: 15px;
+      width: 40px;
+      height: 30px;
+      filter: drop-shadow(2px 3px 2px rgba(0,0,0,0.4));
+    }
+    .cat-body {
+      position: absolute;
+      bottom: 0;
+      width: 38px;
+      height: 22px;
+      background: linear-gradient(160deg, #E8A75C, #C97B32);
+      border-radius: 50% 50% 45% 45%;
+      box-shadow: inset -4px -4px 6px rgba(0,0,0,0.25), 2px 3px 3px rgba(0,0,0,0.35);
+    }
+    .cat-head {
+      position: absolute;
+      bottom: 16px;
+      left: 2px;
+      width: 20px;
+      height: 18px;
+      background: linear-gradient(160deg, #EDB06E, #C97B32);
+      border-radius: 50%;
+      box-shadow: inset -3px -3px 5px rgba(0,0,0,0.2);
+    }
+    .cat-ear {
+      position: absolute;
+      bottom: 28px;
+      width: 0; height: 0;
+      border-left: 4px solid transparent;
+      border-right: 4px solid transparent;
+      border-bottom: 7px solid #C97B32;
+    }
+    .cat-ear.left { left: 2px; transform: rotate(-15deg); }
+    .cat-ear.right { left: 14px; transform: rotate(15deg); }
+    .cat-tail {
+      position: absolute;
+      bottom: 8px;
+      left: 32px;
+      width: 6px;
+      height: 20px;
+      background: linear-gradient(160deg, #E8A75C, #C97B32);
+      border-radius: 50% 50% 0 50%;
+      transform-origin: bottom center;
+      transition: transform 0.3s ease;
+    }
+    .cat-leg {
+      position: absolute;
+      bottom: -3px;
+      width: 4px;
+      height: 8px;
+      background: #B96A28;
+      border-radius: 2px;
+      transform-origin: top center;
+    }
+    .cat-leg.l1 { left: 4px; }
+    .cat-leg.l2 { left: 12px; }
+    .cat-leg.l3 { left: 22px; }
+    .cat-leg.l4 { left: 30px; }
+
+    .cat-box.walking .cat {
+      animation: catBounce 0.4s ease-in-out infinite;
+    }
+    .cat-box.walking .cat-leg.l1,
+    .cat-box.walking .cat-leg.l3 {
+      animation: legSwingA 0.4s ease-in-out infinite;
+    }
+    .cat-box.walking .cat-leg.l2,
+    .cat-box.walking .cat-leg.l4 {
+      animation: legSwingB 0.4s ease-in-out infinite;
+    }
+    .cat-box.walking .cat-tail {
+      animation: tailWag 0.5s ease-in-out infinite;
+    }
+    @keyframes catBounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-2px); }
+    }
+    @keyframes legSwingA {
+      0%, 100% { transform: rotate(15deg); }
+      50% { transform: rotate(-15deg); }
+    }
+    @keyframes legSwingB {
+      0%, 100% { transform: rotate(-15deg); }
+      50% { transform: rotate(15deg); }
+    }
+    @keyframes tailWag {
+      0%, 100% { transform: rotate(10deg); }
+      50% { transform: rotate(-10deg); }
+    }
   </style>
 </head>
 <body>
   <h1>Context-Aware Academic Assistant</h1>
+
+  <div class="mode-toggle">
+    <label><input type="radio" name="mode" value="query" checked> Ask RAG (vault-grounded)</label>
+    <label><input type="radio" name="mode" value="tools"> Ask Tools (calculator / search / deadlines)</label>
+  </div>
+
   <textarea id="prompt" placeholder="Enter your prompt here..."></textarea>
   <br>
+  <label class="file-btn" for="imageInput">Choose File</label>
   <input type="file" id="imageInput" accept="image/*">
+  <span id="fileName">No file chosen</span>
   <br><br>
-  <button id="submitBtn">Send</button>
+
+  <div class="send-row">
+    <button id="submitBtn">Send</button>
+    <div class="cat-box" id="catBox">
+      <div class="cat">
+        <div class="cat-tail"></div>
+        <div class="cat-leg l1"></div>
+        <div class="cat-leg l2"></div>
+        <div class="cat-leg l3"></div>
+        <div class="cat-leg l4"></div>
+        <div class="cat-body"></div>
+        <div class="cat-ear left"></div>
+        <div class="cat-ear right"></div>
+        <div class="cat-head"></div>
+      </div>
+    </div>
+  </div>
+
   <p id="loading" class="hidden">Loading...</p>
   <div id="output"></div>
+  <div id="sources"></div>
 
   <script>
+    document.getElementById('imageInput').addEventListener('change', (e) => {
+      const name = e.target.files.length > 0 ? e.target.files[0].name : 'No file chosen';
+      document.getElementById('fileName').textContent = name;
+    });
+
     document.getElementById('submitBtn').addEventListener('click', async () => {
       const prompt = document.getElementById('prompt').value;
       const fileInput = document.getElementById('imageInput');
       const output = document.getElementById('output');
+      const sourcesEl = document.getElementById('sources');
       const loading = document.getElementById('loading');
-      
+      const catBox = document.getElementById('catBox');
+      const mode = document.querySelector('input[name="mode"]:checked').value;
+
       output.innerText = '';
+      sourcesEl.innerText = '';
       loading.classList.remove('hidden');
+      catBox.classList.add('walking');
 
       let base64Image = null;
       let mimeType = null;
@@ -43,18 +225,27 @@
         });
       }
 
+      const endpoint = mode === 'tools' ? '/tools' : '/query';
+      const body = mode === 'tools'
+        ? { query: prompt }
+        : { prompt, base64Image, mimeType };
+
       try {
-        const res = await fetch('/query', {
+        const res = await fetch(endpoint, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ prompt, base64Image, mimeType })
+          body: JSON.stringify(body)
         });
         const data = await res.json();
-        output.innerText = data.response;
+        output.innerText = data.response ?? data.error ?? 'No response.';
+        if (data.sources && data.sources.length > 0) {
+          sourcesEl.innerText = 'Sources: ' + data.sources.join(', ');
+        }
       } catch (err) {
         output.innerText = 'Error: ' + err.message;
       } finally {
         loading.classList.add('hidden');
+        catBox.classList.remove('walking');
       }
     });
   </script>

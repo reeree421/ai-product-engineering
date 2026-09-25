@@ -1,0 +1,55 @@
+# Query: gemini-2.5-flash
+# ContextLines: 1
+
+11 results - 7 files
+
+build-solutions.cjs:
+  101      const response = await ai.models.generateContent({
+  102:       model: 'gemini-3.6-flash',
+  103        contents: prompt
+
+  148      const response = await ai.models.generateContent({
+  149:       model: 'gemini-3.6-flash',
+  150        contents: prompt,
+
+  277      const response = await ai.models.generateContent({
+  278:       model: 'gemini-3.6-flash',
+  279        contents: contents,
+
+  288         const finalResponse = await ai.models.generateContent({
+  289:          model: 'gemini-3.6-flash',
+  290           contents: [
+
+server.js:
+  35      let response = await ai.models.generateContent({
+  36:       model: 'gemini-3.6-flash',
+  37        contents,
+
+  59        response = await ai.models.generateContent({
+  60:         model: 'gemini-3.6-flash',
+  61          contents,
+
+lib\rag.js:
+  58    const response = await ai.models.generateContent({
+  59:     model: 'gemini-3.6-flash',
+  60      contents: userQuestion,
+
+lib\tools.js:
+  178  
+  179: const MODEL = 'gemini-3.6-flash';
+  180  
+
+scripts\extract-folder.js:
+  62      const response = await ai.models.generateContent({
+  63:       model: 'gemini-3.6-flash',
+  64        contents: [
+
+scripts\extract-image.js:
+  54    const response = await ai.models.generateContent({
+  55:     model: 'gemini-3.6-flash',
+  56      contents: [
+
+scripts\run-agent-task.js:
+  8  
+  9: const MODEL = 'gemini-3.6-flash';
+  10  

@@ -13,11 +13,15 @@ import { GoogleGenAI } from '@google/genai';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const SAMPLE_DIR = path.join(__dirname, '..', 'sample-images');
 
-const EXTRACTION_PROMPT = `Extract the key information from this image.
+const EXTRACTION_PROMPT = `Extract information from this image literally and precisely.
+Do not summarize, generalize, or infer anything not explicitly visible.
 Return ONLY valid JSON with:
-- title: string
-- summary: string
-- key_points: string[] (up to 5)`;
+- title: string (exact text if a title is visible, otherwise describe literally)
+- summary: string (describe only what is visibly drawn or written, one sentence)
+- key_points: string[] (up to 5, quoting visible labels/text exactly as written)
+- framing: string ("maximization" if the goal is reaching a highest/peak point, "minimization" if reaching a lowest point, or "unclear" if not stated)
+- visual_cues: string[] (list any arrows, markers, current-position indicators, or movement/direction shown in the image, even if unlabeled)
+- uncertain_or_illegible: string[] (list anything you are not fully confident about, or leave empty array if none)`;
 
 function findSampleImage() {
   if (!fs.existsSync(SAMPLE_DIR)) return null;
@@ -32,6 +36,20 @@ function mimeFor(filePath) {
   if (ext === '.png') return 'image/png';
   if (ext === '.webp') return 'image/webp';
   return 'image/jpeg';
+}
+
+async function generateWithRetry(ai, params, retries = 3) {
+  for (let attempt = 0; attempt <= retries; attempt += 1) {
+    try {
+      return await ai.models.generateContent(params);
+    } catch (err) {
+      const retryable = err?.status === 503 || err?.status === 429;
+      if (!retryable || attempt === retries) throw err;
+      const delay = 1000 * 2 ** attempt;
+      console.warn(`Model busy (${err.status}), retrying in ${delay}ms...`);
+      await new Promise((r) => setTimeout(r, delay));
+    }
+  }
 }
 
 async function main() {
@@ -51,8 +69,8 @@ async function main() {
 
   const buffer = fs.readFileSync(imagePath);
   const ai = new GoogleGenAI({ apiKey });
-  const response = await ai.models.generateContent({
-    model: 'gemini-2.5-flash',
+  const response = await generateWithRetry(ai, {
+    model: 'gemini-3.5-flash-lite',
     contents: [
       {
         role: 'user',

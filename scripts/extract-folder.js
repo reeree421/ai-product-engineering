@@ -60,7 +60,7 @@ async function main() {
     console.log(`Processing ${i + 1}/${files.length}: ${filename}`);
     const buffer = fs.readFileSync(full);
     const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
+      model: 'gemini-3.5-flash-lite',
       contents: [
         {
           role: 'user',

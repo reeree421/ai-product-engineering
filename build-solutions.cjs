@@ -99,7 +99,7 @@ app.post('/query', async (req, res) => {
   try {
     const { prompt } = req.body;
     const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
+      model: 'gemini-3.5-flash-lite',
       contents: prompt
     });
     res.json({ response: response.text });
@@ -146,7 +146,7 @@ app.post('/query', async (req, res) => {
     const sysPrompt = "Use the following context to answer the user.\\nContext:\\n" + context;
     
     const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
+      model: 'gemini-3.5-flash-lite',
       contents: prompt,
       config: { systemInstruction: sysPrompt }
     });
@@ -275,7 +275,7 @@ app.post('/query', async (req, res) => {
     contents.push(prompt);
 
     const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
+      model: 'gemini-3.5-flash-lite',
       contents: contents,
       config: { 
         systemInstruction: sysPrompt,
@@ -286,7 +286,7 @@ app.post('/query', async (req, res) => {
     if (response.functionCalls && response.functionCalls.length > 0) {
        // Mock handling the tool call
        const finalResponse = await ai.models.generateContent({
-         model: 'gemini-2.5-flash',
+         model: 'gemini-3.5-flash-lite',
          contents: [
             { text: prompt },
             { functionCall: response.functionCalls[0] },
