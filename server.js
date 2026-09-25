@@ -4,6 +4,8 @@ import 'dotenv/config';
 import { buildRagSystemPrompt, retrieveRelevantChunks } from './lib/rag.js';
 import { executeTool, calculatorTool, deadlinesTool, searchKnowledgeBaseTool } from './lib/tools.js';
 import { queryWithTools } from './lib/tools.js';
+import { checkInputSafety } from './lib/safety.js';
+import { stripDisclaimerPhrases } from './lib/output-guardrail.js';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -38,6 +40,14 @@ app.post('/query', async (req, res) => {
 
     if (!userInput || !userInput.trim()) {
       return res.status(400).json({ response: 'Missing or empty query.' });
+    }
+
+    const safety = checkInputSafety(userInput);
+    if (!safety.safe) {
+      return res.status(400).json({
+        error: 'Input violates safety policy.',
+        reason: safety.reason,
+      });
     }
     
     const { base64Image, mimeType } = req.body;
@@ -84,7 +94,7 @@ app.post('/query', async (req, res) => {
       });
     }
 
-    res.json({ response: response.text, sources: chunks.map((c) => c.file) });
+    res.json({ response: stripDisclaimerPhrases(response.text), sources: chunks.map((c) => c.file) });
   } catch (error) {
     console.error(error);
     res.status(500).json({ response: error.message });
