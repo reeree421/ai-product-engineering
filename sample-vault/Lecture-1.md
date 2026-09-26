@@ -1,1 +1,0 @@
-# Lecture 1: Big O\nProfessor strictly prefers O(n log n) algorithms for sorting. Bubble sort will result in zero marks.

@@ -1,1 +1,0 @@
-# Assignment 1\nDue next Friday. Must be written in JavaScript. No external libraries allowed.
