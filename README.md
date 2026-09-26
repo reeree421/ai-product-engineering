@@ -8,7 +8,13 @@ Students often struggle when using generic LLMs for studying because the AI does
 
 If you select this track, your goal is to build a functional Minimum Viable Prototype (MVP) that seamlessly integrates a Node.js/Express backend with Google's Gemini API, utilizing Retrieval-Augmented Generation (RAG), multimodal vision, and autonomous tool calling.
 
----
+## My Implementation Notes
+This track's vault covers Artificial Intelligence II (UFCF9S-15-2) optimization
+topics: local search, evolutionary algorithms, and search operators. The
+assistant answers grounded questions from `sample-vault/01-Concepts/` and
+supports calculator, deadline, and knowledge-base search tools via `/tools`.
+See `03-Project/Architecture.md` for the system diagram and
+`03-Project/Evaluation-Report.md` for eval results.
 
 ## Detailed Requirements Document (PRD)
 
